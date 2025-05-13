@@ -1,18 +1,50 @@
-# Projects microservice
+# Микросервис управления проектами
 
-Creating, changing and managing projects
+gRPC микросервис для управления проектами и участниками, разработанный на Go с использованием PostgreSQL.
 
-## Setup Commands
+## Возможности
 
-```shell
-git clone https://gitlab.crja72.ru/golang/2025/spring/course/projects/go20/scrumtodo/boards
+- Создание проектов с названием и описанием
+- Получение информации о проекте и участниках
+- Добавление участников в проекты
+- Удаление проектов (только для автора)
+- Аутентификация через JWT (сервис Auth)
+- Миграции базы данных
+- Логирование и обработка ошибок
+
+## Архитектура
+```
+└── Projects/
+├── cmd/main.go # Точка входа
+├── internal/
+│ ├── config/ # Конфигурация
+│ ├── models/ # Модели данных
+│ ├── repository/ # Работа с БД
+│ ├── service/ # Бизнес-логика
+│ └── transport/ # gRPC сервер/клиент
+├── pkg/
+│ ├── api/ # Protobuf определения
+│ ├── logger/ # Логирование
+│ └── postgres/ # Подключение к БД
+└── db/migrations/ # Миграции БД
 ```
 
-```shell
-go mod download
+
+## Начало работы
+
+### Требования
+
+- Go 1.24+
+- PostgreSQL
+- Docker (опционально)
+
+### Установка
+
+1. Перейдите в репозиторий Projects
+```bash
+cd Project
 ```
-
-<br/>
-<br/>
-
-![Картинко](for_readme/работаем.jpg)
+2. Запустите через Docker
+```bash
+ docker-compose up --build
+```
