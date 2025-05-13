@@ -1,0 +1,7 @@
+ALTER TABLE tasks
+    ADD COLUMN deadline TIMESTAMP;
+
+ALTER TABLE tasks
+    ADD COLUMN board_id TEXT;
+
+ALTER TABLE tasks DROP COLUMN status;

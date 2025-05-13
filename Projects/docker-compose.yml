@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: project_container
+    image: postgres
+    env_file: .env
+    environment:
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+      PGDATA: /data/postgres
+    volumes:
+      - ./postgres:/data/postgres
+    networks:
+      - gateway_app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "${PORT}:${POSTGRES_PORT}"
+    restart: unless-stopped
+
+  project-service:
+    container_name: project-service
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GRPC_PORT: ${GRPC_PORT}
+      DB_HOST: ${POSTGRES_HOST}
+      DB_PORT: ${POSTGRES_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+    networks:
+      - gateway_app-network
+    ports:
+      - "${GRPC_PORT}:${GRPC_PORT}"
+
+volumes:
+  postgres:
+
+networks:
+  gateway_app-network:
+    external: true

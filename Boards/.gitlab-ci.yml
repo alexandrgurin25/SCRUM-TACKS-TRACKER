@@ -1,0 +1,73 @@
+image: golang:1.24
+
+services:
+    - name: postgres
+      variables:
+          POSTGRES_PASSWORD: "1111"
+          POSTGRES_DB: "boards"
+          POSTGRES_USER: "postgres"
+
+variables:
+    DB_HOST: "postgres"
+    DB_PORT: "5432"
+    DB_NAME: "boards"
+    DB_USER: "postgres"
+    DB_PASSWORD: "1111"
+
+before_script:
+    - apt-get update -qq && apt-get install -y -qq postgresql-client
+    - while ! pg_isready -h $DB_HOST -p $DB_PORT; do sleep 1; done
+
+build:
+    script:
+        - go mod download
+        - go build -o boards ./cmd/main.go
+        - |
+            # Запускаем проверку старта сервера
+            ./boards > server.log 2>&1 &
+            SERVER_PID=$!
+            
+            TIMEOUT=15
+            START_TIME=$(date +%s)
+            FOUND=0
+            
+            while [ $(($(date +%s) - $START_TIME)) -lt $TIMEOUT ]; do
+              if grep -q "Starting gRPC server on port" server.log; then
+                FOUND=1
+                break
+              fi
+              sleep 1
+            done
+            
+            if [ $FOUND -eq 1 ]; then
+              echo "✅ Server started successfully"
+              kill $SERVER_PID
+            else
+              echo "❌ Server failed to start within $TIMEOUT seconds"
+              cat server.log
+              kill $SERVER_PID
+              exit 1
+            fi
+    artifacts:
+        when: on_failure
+        paths:
+            - server.log
+
+test:
+    stage: test
+    script:
+        - go test -coverprofile=coverage.out ./internal/...
+        - go tool cover -html=coverage.out -o coverage.html
+        - |
+            TOTAL_COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print $3}' | sed 's/%//')
+            MIN_COVERAGE=30
+            if (( $(echo "$TOTAL_COVERAGE < $MIN_COVERAGE" | bc -l) )); then
+              echo "Code coverage is $TOTAL_COVERAGE%, which is below the required $MIN_COVERAGE%"
+              exit 1
+            else
+              echo "Code coverage is $TOTAL_COVERAGE%, which meets the requirement"
+            fi
+    artifacts:
+        paths:
+            - coverage.out
+            - coverage.html

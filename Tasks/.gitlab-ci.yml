@@ -1,0 +1,13 @@
+stages:
+    - build
+    - test
+
+building:
+    stage: build
+    script:
+        - echo "Code compile complete."
+
+testing:
+    stage: test
+    script:
+        - echo "Running unit tests"

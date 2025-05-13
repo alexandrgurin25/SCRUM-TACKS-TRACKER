@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS boards (
+    id VARCHAR PRIMARY KEY,
+    author_id VARCHAR,
+    project_id VARCHAR,
+    title VARCHAR(256),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
