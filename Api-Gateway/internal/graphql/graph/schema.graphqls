@@ -1,0 +1,130 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar Timestamp
+
+type User {
+    id: String!
+    email: String!
+    username: String!
+}
+
+type Tokens {
+    accessToken: String!
+    refreshToken: String!
+}
+
+type Task {
+    id: String!
+    boardId: String!
+    authorId: String!
+    title: String!
+    description: String!
+    deadline: Timestamp!
+    createdAt: Timestamp!
+    updatedAt: Timestamp!
+}
+
+type Board {
+    id: String!
+    title: String!
+    tasks: [Task]!
+}
+
+type Project {
+    id: String!
+    authorId: String!
+    participantsId: [String!]!
+    title: String!
+    description: String!
+    createdAt: Timestamp!
+    updatedAt: Timestamp!
+}
+
+type Comment {
+    id: String!
+    taskId: String!
+    authorId: String!
+    title: String!
+    description: String!
+}
+
+input NewUser {
+    username: String!
+    email: String!
+    password: String!
+}
+
+input Login {
+    username: String!
+    password: String!
+}
+
+input NewTask {
+    title: String!
+    boardId: String!
+    description: String!
+    deadline: Timestamp!
+}
+
+input UpdateTask {
+    id: String!
+    title: String!
+    description: String!
+    deadline: Timestamp!
+}
+
+input ChangeBoard {
+    id: String!
+    boardId: String!
+}
+
+input NewBoard {
+    projectId: String!
+    title: String!
+}
+
+input NewProject {
+    title: String!
+    description: String!
+}
+
+input AddParticipant {
+    id: String!
+    email: String!
+}
+
+input NewComment {
+    taskId: String!
+    title: String!
+    description: String!
+}
+
+type Query {
+    getBoardById(id: String!): Board!
+    getProject(id: String!): Project!
+}
+
+type Mutation {
+    registerUser(input: NewUser!): User!
+    loginUser(input: Login!): Tokens!
+    updateTokens(refreshToken: String!): Tokens!
+
+    createTask(input: NewTask!): Task!
+    updateTask(input: UpdateTask!): Task!
+    changeBoard(input: ChangeBoard!): Boolean!
+    deleteTask(id: String!): Boolean!
+
+    createBoard(input: NewBoard!): Board!
+
+    createProject(input: NewProject): String!
+    addParticipantToProject(input: AddParticipant!): Boolean!
+    deleteProject(id: String!): Boolean!
+
+    createComment(input: NewComment!): String!
+}
+
+type Subscription {
+    getComments(taskId: String!): Comment!
+}
